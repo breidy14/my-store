@@ -25,8 +25,8 @@ const getCategory = async (req = request, res = response, next) => {
 
 const createCategory = async (req = request, res = response, next) => {
   try {
-    const body = req.body;
-    const newCategory = await service.create(body);
+    const { state, ...data } = req.body;
+    const newCategory = await service.create(data);
     res.status(201).json(newCategory);
   } catch (error) {
     next(error);
@@ -36,8 +36,8 @@ const createCategory = async (req = request, res = response, next) => {
 const updateCategory = async (req = request, res = response, next) => {
   try {
     const { id } = req.params;
-    const body = req.body;
-    const category = await service.update(id, body);
+    const { state, ...data } = req.body;
+    const category = await service.update(id, data);
     res.json(category);
   } catch (error) {
     next(error);

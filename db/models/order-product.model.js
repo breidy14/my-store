@@ -5,66 +5,71 @@ const { PRODUCT_TABLE } = require('./product.model');
 
 const ORDER_PRODUCT_TABLE = 'orders_products';
 
-const OrderProductSchema = {
-  id: {
-    allowNull: false,
-    autoIncrement: true,
-    primaryKey: true,
-    type: DataTypes.INTEGER,
-  },
-  createdAt: {
-    allowNull: false,
-    type: DataTypes.DATE,
-    field: 'created_at',
-    defaultValue: Sequelize.NOW,
-  },
-  updatedAt: {
-    allowNull: false,
-    type: DataTypes.DATE,
-    field: 'updated_at',
-    defaultValue: Sequelize.NOW,
-  },
-  amount: {
-    allowNull: false,
-    type: DataTypes.INTEGER,
-  },
-  orderId: {
-    field: 'order_id',
-    allowNull: false,
-    type: DataTypes.INTEGER,
-    references: {
-      model: ORDER_TABLE,
-      key: 'id',
+const initOrderProduct = (sequelize) => {
+  const OrderProductSchema = {
+    id: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.INTEGER,
     },
-    onUpdate: 'CASCADE',
-    onDelete: 'SET NULL',
-  },
-  productId: {
-    field: 'product_id',
-    allowNull: false,
-    type: DataTypes.INTEGER,
-    references: {
-      model: PRODUCT_TABLE,
-      key: 'id',
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+      field: 'created_at',
+      defaultValue: Sequelize.NOW,
     },
-    onUpdate: 'CASCADE',
-    onDelete: 'SET NULL',
-  },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+      field: 'updated_at',
+      defaultValue: Sequelize.NOW,
+    },
+    amount: {
+      allowNull: false,
+      type: DataTypes.INTEGER,
+    },
+    orderId: {
+      field: 'order_id',
+      allowNull: false,
+      type: DataTypes.INTEGER,
+      references: {
+        model: ORDER_TABLE,
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    },
+    productId: {
+      field: 'product_id',
+      allowNull: false,
+      type: DataTypes.INTEGER,
+      references: {
+        model: PRODUCT_TABLE,
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    },
+  };
+
+  class OrderProduct extends Model {
+    static associate(models) {
+      //
+    }
+
+    static config(sequelize) {
+      return {
+        sequelize,
+        tableName: ORDER_PRODUCT_TABLE,
+        modelName: 'OrderProduct',
+      };
+    }
+  }
+
+  OrderProduct.init(OrderProductSchema, OrderProduct.config(sequelize));
+
+  return OrderProduct;
 };
 
-class OrderProduct extends Model {
-  static associate(models) {
-    //
-  }
-
-  static config(sequelize) {
-    return {
-      sequelize,
-      tableName: ORDER_PRODUCT_TABLE,
-      modelName: 'OrderProduct',
-      timestamps: false,
-    };
-  }
-}
-
-module.exports = { OrderProduct, OrderProductSchema, ORDER_PRODUCT_TABLE };
+module.exports = { initOrderProduct, ORDER_PRODUCT_TABLE };

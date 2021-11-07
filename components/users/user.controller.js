@@ -29,9 +29,9 @@ const getUser = async (req = request, res = response, next) => {
 
 const createUser = async (req = request, res = response, next) => {
   try {
-    const { body } = req;
+    const { state, role, ...data } = req.body;
 
-    const newUser = await service.create(body);
+    const newUser = await service.create(data);
     res.status(201).json(newUser);
   } catch (error) {
     next(error);
@@ -52,8 +52,8 @@ const updateUser = async (req = request, res = response, next) => {
 const deleteUser = async (req = request, res = response, next) => {
   try {
     const { id } = req.params;
-    const rta = await service.delete(id);
-    res.json(rta);
+    const user = await service.delete(id);
+    res.json(user);
   } catch (error) {
     next(error);
   }

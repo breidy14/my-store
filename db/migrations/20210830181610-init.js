@@ -30,6 +30,10 @@ module.exports = {
         type: Sequelize.DataTypes.STRING,
         defaultValue: 'customer',
       },
+      state: {
+        defaultValue: true,
+        type: Sequelize.BOOLEAN,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DataTypes.DATE,
@@ -81,6 +85,10 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
       },
+      state: {
+        defaultValue: true,
+        type: Sequelize.BOOLEAN,
+      },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DataTypes.DATE,
@@ -103,6 +111,10 @@ module.exports = {
       image: {
         type: Sequelize.DataTypes.STRING,
         allowNull: false,
+      },
+      state: {
+        defaultValue: true,
+        type: Sequelize.BOOLEAN,
       },
       createdAt: {
         allowNull: false,
@@ -139,6 +151,10 @@ module.exports = {
       price: {
         type: Sequelize.DataTypes.INTEGER,
         allowNull: false,
+      },
+      state: {
+        defaultValue: true,
+        type: Sequelize.BOOLEAN,
       },
       createdAt: {
         allowNull: false,

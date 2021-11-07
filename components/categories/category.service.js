@@ -22,10 +22,14 @@ class CategoryService {
   }
 
   async update(id, changes) {
-    return {
-      id,
-      changes,
-    };
+    const categoryDb = await models.Category.findByPk(id);
+
+    if (!categoryDb) {
+      throw boom.notFound('category not found');
+    }
+
+    const category = await categoryDb.update(changes);
+    return category.id;
   }
 
   async delete(id) {

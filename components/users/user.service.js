@@ -1,16 +1,23 @@
 const boom = require('@hapi/boom');
 
-//const { User } = require('../../db/models/user.model');
 const { models } = require('../../libs/sequelize');
 const User = models.User;
 class UsersService {
   async create(data) {
-    const newUser = await User.create(data);
+    const userDb = await this.findByEmail(data.email);
+    if (userDb) {
+      throw boom.badRequest('The email already Exists');
+    }
 
+    const newUser = await User.create(data, {
+      include: ['customer'],
+    });
+
+    delete newUser.dataValues.password;
     return newUser;
   }
 
-  async find(page, limit) {
+  async find() {
     const users = await User.findAll({ where: { state: true } });
 
     return users;
@@ -29,26 +36,41 @@ class UsersService {
     return user;
   }
 
-  async update(id, changes) {
-    const user = await User.findByPk(id);
+  async findByEmail(email) {
+    const user = await User.findOne({
+      where: { email },
+    });
+    return user;
+  }
 
-    if (!user) {
+  async update(id, changes) {
+    const userDb = await User.findByPk(id);
+
+    if (!userDb) {
       throw boom.notFound('user not found');
     }
 
-    const userUp = await user.update(changes);
-    return userUp;
+    const user = await userDb.update(changes);
+    return user;
   }
 
   async delete(id) {
-    const user = await User.findByPk(id);
+    const userDb = await User.findByPk(id, {
+      include: ['customer'],
+    });
 
-    if (!user) {
+    if (!userDb) {
       throw boom.notFound('user not found');
     }
 
-    const userUp = await user.update({ state: false });
-    return userUp.id;
+    if (userDb.Customer.userId) {
+      const customer = await models.Customer.findOne({
+        where: { userId: userDb.Customer.userId },
+      });
+      customer.update({ state: false });
+    }
+    const user = await userDb.update({ state: false });
+    return user.id;
   }
 }
 
