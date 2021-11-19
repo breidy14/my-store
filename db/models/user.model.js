@@ -1,7 +1,6 @@
 'use strict';
 const { Model, DataTypes, Sequelize } = require('sequelize');
 const bcrypt = require('bcrypt');
-//const sequelize = require('../../libs/sequelize');
 const USER_TABLE = 'users';
 
 const initUserModel = (sequelize) => {
@@ -28,7 +27,7 @@ const initUserModel = (sequelize) => {
     role: {
       allowNull: false,
       type: DataTypes.STRING,
-      defaultValue: 'customer',
+      defaultValue: 'CUSTOMER',
     },
     createdAt: {
       allowNull: false,

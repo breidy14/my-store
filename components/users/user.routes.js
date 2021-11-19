@@ -1,5 +1,6 @@
 const { Router } = require('express');
-const { validatorHandler } = require('../../middlewares/validator.handler');
+const passport = require('passport');
+const { validatorHandler, checkRoles } = require('../../middlewares');
 const {
   createUserSchema,
   getUserSchema,
@@ -16,20 +17,37 @@ const {
 
 const router = Router();
 
-router.get('/', getUsers);
+router.get(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN']),
+  getUsers
+);
 
 router.post('/', validatorHandler(createUserSchema, 'body'), createUser);
 
-router.get('/:id', validatorHandler(getUserSchema, 'params'), getUser);
+router.get(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN']),
+  validatorHandler(getUserSchema, 'params'),
+  getUser
+);
 
 router.put(
   '/:id',
-  [
-    validatorHandler(getUserSchema, 'params'),
-    validatorHandler(updateUserSchema, 'body'),
-  ],
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN']),
+  validatorHandler(getUserSchema, 'params'),
+  validatorHandler(updateUserSchema, 'body'),
   updateUser
 );
-router.delete('/:id', validatorHandler(getUserSchema, 'params'), deleteUser);
+router.delete(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN']),
+  validatorHandler(getUserSchema, 'params'),
+  deleteUser
+);
 
 module.exports = router;

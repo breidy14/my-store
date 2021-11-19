@@ -20,6 +20,9 @@ class UsersService {
   async find() {
     const users = await User.findAll({ where: { state: true } });
 
+    users.forEach((user) => {
+      delete user.dataValues.password;
+    });
     return users;
   }
 
@@ -32,6 +35,7 @@ class UsersService {
     if (!user) {
       throw boom.notFound('user not found');
     }
+    delete user.dataValues.password;
 
     return user;
   }
@@ -44,18 +48,8 @@ class UsersService {
   }
 
   async update(id, changes) {
-    const userDb = await User.findByPk(id);
-
-    if (!userDb) {
-      throw boom.notFound('user not found');
-    }
-
-    const user = await userDb.update(changes);
-    return user;
-  }
-
-  async delete(id) {
-    const userDb = await User.findByPk(id, {
+    const userDb = await User.findOne({
+      where: { id, state: true },
       include: ['customer'],
     });
 
@@ -63,14 +57,33 @@ class UsersService {
       throw boom.notFound('user not found');
     }
 
-    if (userDb.Customer.userId) {
+    if (changes.role) {
+      changes.role = changes.role.toUpperCase();
+    }
+
+    const user = await userDb.update(changes);
+    delete user.dataValues.password;
+    return user;
+  }
+
+  async delete(id) {
+    const userDb = await User.findOne({
+      where: { id, state: true },
+      include: ['customer'],
+    });
+
+    if (!userDb) {
+      throw boom.notFound('user not found');
+    }
+    const userId = userDb.dataValues.customer.dataValues.userId;
+    if (userId) {
       const customer = await models.Customer.findOne({
-        where: { userId: userDb.Customer.userId },
+        where: { userId },
       });
       customer.update({ state: false });
     }
-    const user = await userDb.update({ state: false });
-    return user.id;
+    const rta = await userDb.update({ state: false });
+    return rta.id;
   }
 }
 

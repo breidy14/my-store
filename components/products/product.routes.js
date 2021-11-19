@@ -1,5 +1,6 @@
 const { Router } = require('express');
-const { validatorHandler } = require('../../middlewares/validator.handler');
+const passport = require('passport');
+const { validatorHandler, checkRoles } = require('../../middlewares');
 const {
   createProductSchema,
   getProductSchema,
@@ -19,20 +20,28 @@ const router = Router();
 
 router.get('/', validatorHandler(queryProductSchema, 'query'), getProducts);
 
-router.post('/', validatorHandler(createProductSchema, 'body'), createProduct);
+router.post(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN', 'SELLER']),
+  validatorHandler(createProductSchema, 'body'),
+  createProduct
+);
 
 router.get('/:id', validatorHandler(getProductSchema, 'params'), getProduct);
 
 router.put(
   '/:id',
-  [
-    validatorHandler(getProductSchema, 'params'),
-    validatorHandler(updateProductSchema, 'body'),
-  ],
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN', 'SELLER']),
+  validatorHandler(getProductSchema, 'params'),
+  validatorHandler(updateProductSchema, 'body'),
   updateProduct
 );
 router.delete(
   '/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN', 'SELLER']),
   validatorHandler(getProductSchema, 'params'),
   deleteProduct
 );

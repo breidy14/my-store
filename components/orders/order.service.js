@@ -5,20 +5,18 @@ const { models } = require('../../libs/sequelize');
 class OrderService {
   constructor() {}
 
-  async create(data) {
+  async create(user) {
+    const data = {
+      customerId: user.customer.id,
+    };
     const newOrder = await models.Order.create(data);
     return newOrder;
   }
 
-  async addItem(data) {
-    const newItem = await models.OrderProduct.create(data);
-    return newItem;
-  }
-
-  async findByUser(userId) {
+  async findByUser(user) {
     const orders = await models.Order.findAll({
       where: {
-        '$customer.user.id$': userId,
+        '$customer.user.id$': user.id,
       },
       include: [
         {
@@ -26,6 +24,10 @@ class OrderService {
           include: ['user'],
         },
       ],
+    });
+
+    orders.forEach((order) => {
+      delete order.customer.user.dataValues.password;
     });
     return orders;
   }
@@ -42,17 +44,44 @@ class OrderService {
     });
 
     if (!order) {
-      throw boom.notFound('user not found');
+      throw boom.notFound('order not found');
     }
-
+    delete order.customer.user.dataValues.password;
     return order;
   }
 
-  async update(id, changes) {
-    return {
-      id,
-      changes,
-    };
+  async addItem(data, user) {
+    const orderDb = await models.Order.findOne({
+      where: { id: data.orderId, customerId: user.customer.id },
+    });
+    if (!orderDb) {
+      throw boom.badRequest('order not found');
+    }
+
+    const newItem = await models.OrderProduct.create(data);
+    return newItem;
+  }
+
+  async deleteItem(id, user) {
+    const orderProductDb = await models.Order.findOne({
+      where: {
+        id,
+        '$order.customer.userId$': user.id,
+      },
+      include: [
+        {
+          association: 'order',
+          include: ['customer'],
+        },
+      ],
+    });
+    if (!orderProductDb) {
+      throw boom.badRequest('order not found');
+    }
+
+    await orderProductDb.destroy();
+
+    return id;
   }
 
   async delete(id) {

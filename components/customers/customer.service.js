@@ -5,21 +5,26 @@ class CustomerService {
   constructor() {}
 
   async find() {
-    const rta = await models.Customer.findAll({
+    const customers = await models.Customer.findAll({
       include: ['user'],
     });
-    return rta;
+    customers.forEach((customer) => {
+      delete customer.user.dataValues.password;
+    });
+    return customers;
   }
 
   async findOne(id) {
-    const user = await models.Customer.findOne({
+    const customer = await models.Customer.findOne({
       where: { id, state: true },
       include: ['user'],
     });
-    if (!user) {
+    if (!customer) {
       throw boom.notFound('customer not found');
     }
-    return user;
+
+    delete customer.user.dataValues.password;
+    return customer;
   }
 
   async create(data) {
@@ -32,33 +37,42 @@ class CustomerService {
   }
 
   async update(id, changes) {
-    const userDb = await models.Customer.findOne(id);
-    if (!userDb) {
+    const customerDb = await models.Customer.findOne({
+      where: {
+        id,
+      },
+    });
+    if (!customerDb) {
       throw boom.notFound('customer not found');
     }
+    console.log(changes);
+    const customer = await customerDb.update(changes);
 
-    const rta = await models.Customer.update(changes);
-    return rta;
+    return customer;
   }
 
   async delete(id) {
-    const customerDb = await models.Customer.findByPk(id, {
-      include: ['user'],
+    const customerDb = await models.Customer.findOne({
+      where: {
+        id,
+      },
+      include: 'user',
     });
 
     if (!customerDb) {
       throw boom.notFound('customer not found');
     }
 
-    const customerUp = await customerDb.update({ state: false });
-    if (customerDb.User.id) {
+    const userId = customerDb.dataValues.user.dataValues.userId;
+    if (userId) {
       const user = await models.User.findOne({
-        where: { id: customerDb.userId },
+        where: { id: userId },
       });
       user.update({ state: false });
     }
 
-    return customerUp.id;
+    const customer = await customerDb.update({ state: false });
+    return customer.id;
   }
 }
 

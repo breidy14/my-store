@@ -10,14 +10,22 @@ class CategoryService {
   }
 
   async find() {
-    const categories = await models.Category.findAll();
+    const categories = await models.Category.findAll({
+      where: { state: true },
+    });
     return categories;
   }
 
   async findOne(id) {
-    const category = await models.Category.findByPk(id, {
+    const category = await models.Category.findOne({
+      where: { id, state: true },
       include: ['products'],
     });
+
+    if (!category) {
+      throw boom.notFound('category not found');
+    }
+
     return category;
   }
 
@@ -33,7 +41,9 @@ class CategoryService {
   }
 
   async delete(id) {
-    const category = await models.Category.findByPk(id);
+    const category = await models.Category.findOne({
+      where: { id, state: true },
+    });
 
     if (!category) {
       throw boom.notFound('category not found');

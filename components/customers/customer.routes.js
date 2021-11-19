@@ -1,6 +1,7 @@
 const { Router } = require('express');
+const passport = require('passport');
 
-const { validatorHandler } = require('../../middlewares/validator.handler');
+const { validatorHandler, checkRoles } = require('../../middlewares');
 const {
   createCustomerSchema,
   getCustomerSchema,
@@ -9,6 +10,7 @@ const {
 
 const {
   getCustomers,
+  getCustomer,
   createCustomer,
   updateCustomer,
   deleteCustomer,
@@ -16,7 +18,12 @@ const {
 
 const router = Router();
 
-router.get('/', getCustomers);
+router.get(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN']),
+  getCustomers
+);
 
 router.post(
   '/',
@@ -24,8 +31,17 @@ router.post(
   createCustomer
 );
 
+router.get(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN']),
+  getCustomer
+);
+
 router.patch(
   '/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN']),
   validatorHandler(getCustomerSchema, 'params'),
   validatorHandler(updateCustomerSchema, 'body'),
   updateCustomer
@@ -33,6 +49,8 @@ router.patch(
 
 router.delete(
   '/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN']),
   validatorHandler(getCustomerSchema, 'params'),
   deleteCustomer
 );

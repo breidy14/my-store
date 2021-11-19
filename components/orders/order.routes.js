@@ -1,14 +1,11 @@
 const { Router } = require('express');
+const passport = require('passport');
 
-const { validatorHandler } = require('../../middlewares/validator.handler');
-const {
-  getOrderSchema,
-  createOrderSchema,
-  addItemSchema,
-} = require('./order.schema');
+const { validatorHandler, checkRoles } = require('../../middlewares');
+const { getOrderSchema, addItemSchema } = require('./order.schema');
 
 const {
-  getOrders,
+  myOrders,
   createOrder,
   getOrder,
   addItemOrder,
@@ -16,11 +13,40 @@ const {
 
 const router = Router();
 
-router.get('/', getOrders);
-router.get('/:id', validatorHandler(getOrderSchema, 'params'), getOrder);
+router.get(
+  '/my-orders',
+  passport.authenticate('jwt', { session: false }),
+  myOrders
+);
+router.get(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN', 'SELLER', 'CUSTOMER']),
+  validatorHandler(getOrderSchema, 'params'),
+  getOrder
+);
 
-router.post('/', validatorHandler(createOrderSchema, 'body'), createOrder);
+router.post(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN', 'SELLER', 'CUSTOMER']),
+  createOrder
+);
 
-router.post('/add-item', validatorHandler(addItemSchema, 'body'), addItemOrder);
+router.post(
+  '/item',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN', 'SELLER', 'CUSTOMER']),
+  validatorHandler(addItemSchema, 'body'),
+  addItemOrder
+);
+
+router.delete(
+  '/item',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['ADMIN', 'SELLER', 'CUSTOMER']),
+  validatorHandler(addItemSchema, 'body'),
+  addItemOrder
+);
 
 module.exports = router;

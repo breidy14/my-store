@@ -13,6 +13,7 @@ class AuthService {
     if (!user) {
       throw boom.unauthorized('email or password is incorrect');
     }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw boom.unauthorized('email or password is incorrect');
