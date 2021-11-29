@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const logger = require('morgan');
 const passport = require('passport');
+const fileUpload = require('express-fileupload');
 
 const {
   boomErrorHandler,
@@ -33,6 +34,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize());
 passport.use(JwtStrategy);
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: '/tmp/',
+    limits: { fileSize: 50 * 1024 * 1024 },
+    createParentPath: true,
+  })
+);
 
 routerApi(app);
 

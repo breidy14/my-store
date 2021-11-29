@@ -15,7 +15,10 @@ if (config.isProd) {
   };
 }
 
-const sequelize = new Sequelize(config.dbUrl, options);
+const sequelize = new Sequelize(
+  `postgres:${config.db_user}:${config.db_password}@${config.db_host}:${config.db_port}/${config.db_name}`,
+  options
+);
 
 setupModels(sequelize);
 

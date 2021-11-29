@@ -4,6 +4,7 @@ const { USER_TABLE } = require('./../models/user.model');
 const { CUSTOMER_TABLE } = require('./../models/customer.model');
 const { CATEGORY_TABLE } = require('./../models/category.model');
 const { PRODUCT_TABLE } = require('./../models/product.model');
+const { PRODUCT_IMAGES_TABLE } = require('../models/product-images.model');
 const { ORDER_TABLE } = require('./../models/order.model');
 const { ORDER_PRODUCT_TABLE } = require('./../models/order-product.model');
 
@@ -180,6 +181,46 @@ module.exports = {
         onDelete: 'SET NULL',
       },
     });
+    await queryInterface.createTable(PRODUCT_IMAGES_TABLE, {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.DataTypes.INTEGER,
+      },
+      url: {
+        allowNull: false,
+        type: Sequelize.DataTypes.STRING,
+      },
+      numberImg: {
+        field: 'number_img',
+        allowNull: false,
+        type: Sequelize.DataTypes.INTEGER,
+      },
+      productId: {
+        field: 'product_id',
+        allowNull: false,
+        type: Sequelize.DataTypes.INTEGER,
+        references: {
+          model: PRODUCT_TABLE,
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DataTypes.DATE,
+        field: 'created_at',
+        defaultValue: Sequelize.NOW,
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DataTypes.DATE,
+        field: 'updated_at',
+        defaultValue: Sequelize.NOW,
+      },
+    });
     await queryInterface.createTable(ORDER_TABLE, {
       id: {
         allowNull: false,
@@ -263,6 +304,7 @@ module.exports = {
     await queryInterface.dropTable(ORDER_PRODUCT_TABLE);
     await queryInterface.dropTable(ORDER_TABLE);
     await queryInterface.dropTable(PRODUCT_TABLE);
+    await queryInterface.dropTable(PRODUCT_IMAGES_TABLE);
     await queryInterface.dropTable(CATEGORY_TABLE);
     await queryInterface.dropTable(CUSTOMER_TABLE);
     await queryInterface.dropTable(USER_TABLE);

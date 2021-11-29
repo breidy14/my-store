@@ -24,16 +24,18 @@ const getProduct = async (req = request, res = response, next) => {
 };
 
 const createProduct = async (req = request, res = response) => {
-  const body = req.body;
-  const newProduct = await service.create(body);
+  const data = req.body;
+  const files = req.files;
+  const newProduct = await service.create({ data, files });
   res.status(201).json(newProduct);
 };
 
 const updateProduct = async (req = request, res = response, next) => {
   try {
     const { id } = req.params;
-    const body = req.body;
-    const product = await service.update(id, body);
+    const data = req.body;
+    const files = req.files;
+    const product = await service.update({ id, data, files });
     res.json(product);
   } catch (error) {
     next(error);

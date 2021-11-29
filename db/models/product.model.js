@@ -16,10 +16,6 @@ const initProductModel = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    image: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     description: {
       type: DataTypes.TEXT,
       allowNull: false,
@@ -60,6 +56,10 @@ const initProductModel = (sequelize) => {
   class Product extends Model {
     static associate(models) {
       this.belongsTo(models.Category, { as: 'category' });
+      this.hasMany(models.ProductImages, {
+        as: 'images',
+        foreignKey: 'productId',
+      });
     }
 
     static config(sequelize) {
